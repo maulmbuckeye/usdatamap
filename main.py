@@ -8,10 +8,12 @@ from PIL import Image
 from matplotlib.patches import Patch, Circle
 
 UNINCORPORATED_TERRORIES = ["72", "69", "60", "66", "78"]
+ALASKA = "02"
+HAWAII = "15"
 
 
 def get_us_geo_data(path_to_data: str):
-    print(f"Reading county info {path_to_data} ... ", end='')
+    print(f"Reading {path_to_data} ... ", end='')
     geodata = gpd.read_file(path_to_data)
     print("DONE")
 
@@ -21,7 +23,8 @@ def get_us_geo_data(path_to_data: str):
     # https://geopandas.org/en/stable/docs/user_guide/projections.html
     geodata = geodata.to_crs("ESRI:102003")
 
-    geodata = adjust_maps(geodata)
+    geodata = move_a_state(geodata, ALASKA, 1300000, -4900000, 0.5, 32)
+    geodata = move_a_state(geodata, HAWAII, 5400000, -1500000, 1, 24)
 
     return geodata
 
@@ -35,15 +38,13 @@ def translate_geometries(df, x, y, scale, rotate):
     return df
 
 
-def adjust_maps(df):
-    df_main_land = df[~df.STATEFP.isin(["02", "15"])]
-    df_alaska = df[df.STATEFP == "02"]
-    df_hawaii = df[df.STATEFP == "15"]
+def move_a_state(df, state_to_move: str, new_x, new_y, scale, rotate):
+    df_state_to_move = df[df.STATEFP == state_to_move]
+    df_other_states = df[~df.STATEFP.isin([state_to_move])]
 
-    df_alaska = translate_geometries(df_alaska, 1300000, -4900000, 0.5, 32)
-    df_hawaii = translate_geometries(df_hawaii, 5400000, -1500000, 1, 24)
+    df_state_to_move = translate_geometries(df_state_to_move, new_x, new_y, scale, rotate)
 
-    return pd.concat([df_main_land, df_alaska, df_hawaii])
+    return pd.concat([df_other_states, df_state_to_move])
 
 
 def main():
