@@ -21,7 +21,29 @@ def get_us_geo_data(path_to_data: str):
     # https://geopandas.org/en/stable/docs/user_guide/projections.html
     geodata = geodata.to_crs("ESRI:102003")
 
+    geodata = adjust_maps(geodata)
+
     return geodata
+
+
+def translate_geometries(df, x, y, scale, rotate):
+    df.loc[:, "geometry"] = df.geometry.translate(yoff=y, xoff=x)
+    center = df.dissolve().centroid.iloc[0]
+    df.loc[:, "geometry"] = df.geometry.scale(xfact=scale, yfact=scale, origin=center)
+    df.loc[:, "geometry"] = df.geometry.rotate(rotate, origin=center)
+
+    return df
+
+
+def adjust_maps(df):
+    df_main_land = df[~df.STATEFP.isin(["02", "15"])]
+    df_alaska = df[df.STATEFP == "02"]
+    df_hawaii = df[df.STATEFP == "15"]
+
+    df_alaska = translate_geometries(df_alaska, 1300000, -4900000, 0.5, 32)
+    df_hawaii = translate_geometries(df_hawaii, 5400000, -1500000, 1, 24)
+
+    return pd.concat([df_main_land, df_alaska, df_hawaii])
 
 
 def main():
