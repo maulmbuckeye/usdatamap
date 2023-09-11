@@ -81,8 +81,9 @@ def main():
     facebook_df = FacebookData()
     facebook_df.get()
     print(facebook_df.df.head(5))
-
-    county_id = "06075"
+    SAN_FRANCISCO_CA_COUNTY = "06075"
+    WARREN_OH_COUNTY = "39165"
+    county_id = WARREN_OH_COUNTY
 
     county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county_id]
 
