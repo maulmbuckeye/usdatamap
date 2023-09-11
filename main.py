@@ -125,8 +125,9 @@ def main():
         plot_counties_by_connections_to_the_county(county_id, states, counties)
 
 
-class FacebookData():
-    FACEBOOK_DATA = "./data/county_county.gzip"
+class FacebookData:
+    FACEBOOK_DATA_GZIP = "./data/county_county.gzip"
+    FACEBOOK_DATA_TSV = "./data/county_county.tsv"
 
     def __init__(self):
         pass
