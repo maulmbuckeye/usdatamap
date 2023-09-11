@@ -15,6 +15,10 @@ CALIFORNIA = "06"
 HAWAII = "15"
 OHIO = "39"
 
+SAN_FRANCISCO_CA_COUNTY = "06075"
+WARREN_OH_COUNTY = "39165"
+HAMILTON_OH_COUNTY = "39061"
+
 
 def get_us_geo_data(path_to_data: str):
     print(f"Reading {path_to_data} ... ", end='')
@@ -61,30 +65,7 @@ def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]
     return colors
 
 
-def main():
-    edge_color = "#30011E"
-    background_color = "#fafafa"
-
-    sns.set_style({
-        "font.family": "serif",
-        "figure.facecolor": background_color,
-        "axes.facecolor": background_color
-    })
-
-    # https://www.census.gov/library/reference/code-lists/ansi.html#cou
-    # GOID is six right most digts of the COUNTYNS
-    counties = get_us_geo_data("./data/cb_2018_us_county_500k")
-    counties = counties.set_index("GEOID")
-
-    states = get_us_geo_data("./data/cb_2018_us_state_500k")
-
-    facebook_df = FacebookData()
-    facebook_df.get()
-    print(facebook_df.df.head(5))
-    SAN_FRANCISCO_CA_COUNTY = "06075"
-    WARREN_OH_COUNTY = "39165"
-    county_id = WARREN_OH_COUNTY
-
+def assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id):
     county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county_id]
 
     selected_color = "#fa26a0"
@@ -101,13 +82,43 @@ def main():
     counties.loc[:, "color"] = create_color(counties, data_breaks)
     counties.loc[county_id, "color"] = selected_color
 
+    return counties
+
+
+def plot_counties_by_connections_to_the_county(county_id, states, counties):
+
     county_name = counties.loc[county_id].NAME
+
+    edge_color = "#30011E"
+    background_color = "#fafafa"
+
+    sns.set_style({
+        "font.family": "serif",
+        "figure.facecolor": background_color,
+        "axes.facecolor": background_color
+    })
 
     ax = counties.plot(edgecolor=edge_color + "55", color=counties.color, figsize=(20, 20))
     states.plot(ax=ax, edgecolor=edge_color, color="None", linewidth=1)
 
     plt.axis("off")
     plt.show()
+
+
+def main():
+    # https://www.census.gov/library/reference/code-lists/ansi.html#cou
+    # GOID is six right most digts of the COUNTYNS
+    counties = get_us_geo_data("./data/cb_2018_us_county_500k")
+    counties = counties.set_index("GEOID")
+
+    states = get_us_geo_data("./data/cb_2018_us_state_500k")
+
+    facebook_df = FacebookData()
+    facebook_df.get()
+
+    county_id = HAMILTON_OH_COUNTY
+    counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
+    plot_counties_by_connections_to_the_county(county_id, states, counties)
 
 
 class FacebookData():
