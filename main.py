@@ -116,16 +116,21 @@ class FacebookData():
         pass
 
     def get(self):
-        if isfile(self.FACEBOOK_DATA):
-            self.df = pd.read_parquet(self.FACEBOOK_DATA)  # noqa
+        if isfile(self.FACEBOOK_DATA_GZIP):
+            print(f"Reading {self.FACEBOOK_DATA_GZIP} ... ", end='')
+            self.df = pd.read_parquet(self.FACEBOOK_DATA_GZIP)  # noqa
+            print("DONE")
         else:
             self._get_from_tsv()
 
     def _get_from_tsv(self):
-        df = pd.read_csv("./data/county_county.tsv", sep="\t")     # noqa
+        print(f"Reading {self.FACEBOOK_DATA_TSV} ... ", end='')
+        df = pd.read_csv(self.FACEBOOK_DATA_TSV, sep="\t")     # noqa
+        print("DONE")
+
         df.user_loc = ("0" + df.user_loc.astype(str)).str[-5:]
         df.fr_loc = ("0" + df.fr_loc.astype(str)).str[-5:]
-        df.to_parquet(self.FACEBOOK_DATA, compression="gzip")
+        df.to_parquet(self.FACEBOOK_DATA_GZIP, compression="gzip")
         self.df = df
 
 
