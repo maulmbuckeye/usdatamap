@@ -57,9 +57,10 @@ def move_a_state(df, state_to_move: str, new_x, new_y, scale, rotate): # noqa
 
 def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]:
     colors = []
+    lookup = {p: np.percentile(county_df.value, p) for p, _, _ in data_breaks}
     for _, row in county_df.iterrows():
         for p, c, _ in data_breaks:
-            if row.value >= np.percentile(county_df.value, p):
+            if row.value >= lookup[p]:
                 colors.append(c)
                 break
     return colors
