@@ -1,38 +1,38 @@
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import geopandas as gpd
-import matplotlib.pyplot as plt
 from os.path import isfile
 
 from PIL import Image
 from matplotlib.patches import Patch, Circle
 
-# FIPS codes per state https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html
-UNINCORPORATED_TERRORIES = ["72", "69", "60", "66", "78"]
-ALASKA = "02"
-CALIFORNIA = "06"
-HAWAII = "15"
-OHIO = "39"
-
-SAN_FRANCISCO_CA_COUNTY = "06075"
-WARREN_OH_COUNTY = "39165"
-HAMILTON_OH_COUNTY = "39061"
+import geo_info as gi
+import plot_counties as pc
 
 
 def get_us_geo_data(path_to_data: str):
+
+    path_to_gzip = path_to_data + ".gzip"
+    if isfile(path_to_gzip):
+        print(f"Reading {path_to_gzip} ... ", end='')
+        geodata = gpd.read_parquet(path_to_gzip)
+        print("DONE")
+        return geodata
+
     print(f"Reading {path_to_data} ... ", end='')
     geodata = gpd.read_file(path_to_data)
     print("DONE")
 
-    geodata = geodata[~geodata.STATEFP.isin(UNINCORPORATED_TERRORIES)]
+    geodata = geodata[~geodata.STATEFP.isin(gi.UNINCORPORATED_TERRORIES)]
 
     # Change projection, i.e., Coordinate Reference Systems
     # https://geopandas.org/en/stable/docs/user_guide/projections.html
     geodata = geodata.to_crs("ESRI:102003")
 
-    geodata = move_a_state(geodata, ALASKA, 1300000, -4900000, 0.5, 32)
-    geodata = move_a_state(geodata, HAWAII, 5400000, -1500000, 1, 24)
+    geodata = move_a_state(geodata, gi.ALASKA, 1300000, -4900000, 0.5, 32)
+    geodata = move_a_state(geodata, gi.HAWAII, 5400000, -1500000, 1, 24)
+
+    geodata.to_parquet(path_to_gzip)
 
     return geodata
 
@@ -58,9 +58,9 @@ def move_a_state(df, state_to_move: str, new_x, new_y, scale, rotate): # noqa
 def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]:
     colors = []
     lookup = {p: np.percentile(county_df.value, p) for p, _, _ in data_breaks}
-    for _, row in county_df.iterrows():
+    for _, county in county_df.iterrows():
         for p, c, _ in data_breaks:
-            if row.value >= lookup[p]:
+            if county.value >= lookup[p]:
                 colors.append(c)
                 break
     return colors
@@ -86,29 +86,7 @@ def assign_color_to_counties_by_facebook_connections(counties, facebook_df, coun
     return counties
 
 
-def plot_counties_by_connections_to_the_county(county_id, states, counties):
-
-    county_name = counties.loc[county_id].NAME
-
-    edge_color = "#30011E"
-    background_color = "#fafafa"
-
-    sns.set_style({
-        "font.family": "serif",
-        "figure.facecolor": background_color,
-        "axes.facecolor": background_color
-    })
-
-    ax = counties.plot(edgecolor=edge_color + "55", color=counties.color, figsize=(20, 20))
-    states.plot(ax=ax, edgecolor=edge_color, color="None", linewidth=1)
-
-    plt.axis("off")
-    plt.show()
-
-
 def main():
-    # https://www.census.gov/library/reference/code-lists/ansi.html#cou
-    # GOID is six right most digts of the COUNTYNS
     counties = get_us_geo_data("./data/cb_2018_us_county_500k")
     counties = counties.set_index("GEOID")
 
@@ -122,7 +100,7 @@ def main():
         if county_id == "exit":
             break
         counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
-        plot_counties_by_connections_to_the_county(county_id, states, counties)
+        pc.plot_counties_by_connections_to_the_county(county_id, states, counties)
 
 
 class FacebookData:
