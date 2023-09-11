@@ -4,7 +4,7 @@ import geopandas as gpd
 from os.path import isfile
 
 from PIL import Image
-from matplotlib.patches import Patch, Circle
+
 
 import geo_info as gi
 import plot_counties as pc
@@ -69,7 +69,6 @@ def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]
 def assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id):
     county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county_id]
 
-    selected_color = "#fa26a0"
     data_breaks = [
         (90, "#00ffff", "Top 10%"),
         (70, "#00b5ff", "90-70%"),
@@ -81,7 +80,7 @@ def assign_color_to_counties_by_facebook_connections(counties, facebook_df, coun
     counties.loc[:, "value"] = county_facebook_df.set_index("fr_loc").scaled_sci
     counties.loc[:, "value"] = counties["value"].fillna(0)
     counties.loc[:, "color"] = create_color(counties, data_breaks)
-    counties.loc[county_id, "color"] = selected_color
+    counties.loc[county_id, "color"] = pc.SELECTED_COLOR
 
     return counties
 
@@ -95,9 +94,13 @@ def main():
     facebook_df = FacebookData()
     facebook_df.get()
 
+    print("\nProvide the 5 character FPs for the county (2 for state, 3 for county)")
+    print("An example for Warren County, OH:")
+    print("\t39165")
+    print("Reponse with 'exit' to exit")
     while True:
         county_id = input("county_id=").strip()
-        if county_id == "exit":
+        if county_id.lower() == "exit":
             break
         counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
         pc.plot_counties_by_connections_to_the_county(county_id, states, counties)
