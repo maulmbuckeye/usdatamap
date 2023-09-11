@@ -117,9 +117,12 @@ def main():
     facebook_df = FacebookData()
     facebook_df.get()
 
-    county_id = HAMILTON_OH_COUNTY
-    counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
-    plot_counties_by_connections_to_the_county(county_id, states, counties)
+    while True:
+        county_id = input("county_id=").strip()
+        if county_id == "exit":
+            break
+        counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
+        plot_counties_by_connections_to_the_county(county_id, states, counties)
 
 
 class FacebookData():
