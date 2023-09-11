@@ -8,6 +8,7 @@ from os.path import isfile
 from PIL import Image
 from matplotlib.patches import Patch, Circle
 
+# FIPS codes per state https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html
 UNINCORPORATED_TERRORIES = ["72", "69", "60", "66", "78"]
 ALASKA = "02"
 HAWAII = "15"
@@ -68,6 +69,8 @@ def main():
         "axes.facecolor": background_color
     })
 
+    # https://www.census.gov/library/reference/code-lists/ansi.html#cou
+    # GOID is six right most digts of the COUNTYNS
     counties = get_us_geo_data("./data/cb_2018_us_county_500k")
     counties = counties.set_index("GEOID")
 
