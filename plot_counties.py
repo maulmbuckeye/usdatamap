@@ -1,5 +1,8 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch, Circle
+
+SELECTED_COLOR = "#fa26a0"
 
 
 def plot_counties_by_connections_to_the_county(county_id, states, counties):
@@ -19,6 +22,7 @@ def plot_counties_by_connections_to_the_county(county_id, states, counties):
     states.plot(ax=ax, edgecolor=edge_color, color="None", linewidth=1)
 
     add_titles(county_id, county_name)
+    add_circle(ax, counties, county_id)
 
     plt.axis("off")
     plt.show()
@@ -42,3 +46,15 @@ def add_titles(county_id, county_name):
         above_the_drawing=1.03, fontsize=32
     )
 
+
+def add_circle(ax, counties_df, county_id):
+    center = counties_df[counties_df.index == county_id].geometry.centroid.iloc[0]
+    ax.add_artist(
+        Circle(
+            radius=100000,
+            xy=(center.x, center.y),
+            facecolor="None",
+            edgecolor=SELECTED_COLOR,
+            linewidth=4
+        )
+    )
