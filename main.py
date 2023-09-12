@@ -66,16 +66,17 @@ def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]
     return colors
 
 
+data_breaks = [
+    (90, "#00ffff", "Top 10%"),
+    (70, "#00b5ff", "90-70%"),
+    (50, "#6784ff", "70-50%"),
+    (30, "#aeb3fe", "50-30%"),
+    (0, "#e6e5fc", "Bottom 30%")
+]
+
+
 def assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id):
     county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county_id]
-
-    data_breaks = [
-        (90, "#00ffff", "Top 10%"),
-        (70, "#00b5ff", "90-70%"),
-        (50, "#6784ff", "70-50%"),
-        (30, "#aeb3fe", "50-30%"),
-        (0, "#e6e5fc", "Bottom 30%")
-    ]
 
     counties.loc[:, "value"] = county_facebook_df.set_index("fr_loc").scaled_sci
     counties.loc[:, "value"] = counties["value"].fillna(0)
@@ -103,7 +104,7 @@ def main():
         if county_id.lower() == "exit":
             break
         counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
-        pc.plot_counties_by_connections_to_the_county(county_id, states, counties)
+        pc.plot_counties_by_connections_to_the_county(county_id, states, counties, data_breaks)
 
 
 class FacebookData:
