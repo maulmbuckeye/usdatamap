@@ -9,7 +9,7 @@ BACKGROUND_COLOR = "#fafafa"
 
 def plot_counties_by_connections_to_the_county(county_id, states, counties, data_breaks):
 
-    county_name = counties.loc[county_id].NAME
+    county_name = counties.loc[county_id.fips].NAME
 
     sns.set_style({
         "font.family": "serif",
@@ -19,6 +19,7 @@ def plot_counties_by_connections_to_the_county(county_id, states, counties, data
 
     ax = counties.plot(edgecolor=EDGE_COLOR + "55", color=counties.color, figsize=(20, 20))
     states.plot(ax=ax, edgecolor=EDGE_COLOR, color="None", linewidth=1)
+    ax.set(xlim=(-2600000, None))  # Remove some of the padding to the left of diagram
 
     add_titles(county_id, county_name)
     add_circle(ax, counties, county_id)
@@ -55,13 +56,13 @@ def add_titles(county_id, county_name):
         above_the_drawing=1.1, fontsize=16
     )
     _add_centered_title(
-        f"{county_name} (FIPS Code {county_id})",
+        f"{county_name} (FIPS Code {county_id.fips})",
         above_the_drawing=1.03, fontsize=32
     )
 
 
 def add_circle(ax, counties_df, county_id):
-    center = counties_df[counties_df.index == county_id].geometry.centroid.iloc[0]
+    center = counties_df[counties_df.index == county_id.fips].geometry.centroid.iloc[0]
     ax.add_artist(
         Circle(
             radius=100000,

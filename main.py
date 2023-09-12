@@ -76,12 +76,12 @@ data_breaks = [
 
 
 def assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id):
-    county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county_id]
+    county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county_id.fips]
 
     counties.loc[:, "value"] = county_facebook_df.set_index("fr_loc").scaled_sci
     counties.loc[:, "value"] = counties["value"].fillna(0)
     counties.loc[:, "color"] = create_color(counties, data_breaks)
-    counties.loc[county_id, "color"] = pc.SELECTED_COLOR
+    counties.loc[county_id.fips, "color"] = pc.SELECTED_COLOR
 
     return counties
 
@@ -100,11 +100,18 @@ def main():
     print("\t39165")
     print("Reponse with 'exit' to exit")
     while True:
-        county_id = input("county_id=").strip()
-        if county_id.lower() == "exit":
+        response = input("county_id: ").strip()
+        if response.lower() == "exit":
             break
+        county_id = County(response)
         counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
         pc.plot_counties_by_connections_to_the_county(county_id, states, counties, data_breaks)
+
+
+class County:
+
+    def __init__(self, fips: str):
+        self.fips = fips
 
 
 class FacebookData:
