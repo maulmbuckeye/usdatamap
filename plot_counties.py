@@ -43,6 +43,7 @@ def add_information():
     explain = """The Facebook Connectivity Index measures the likelyhood that user in different
     locations are connected on Facebook. The formula divides the number of Facebook
     connections with the number of possible connections for the two locations."""
+
     _add_centered_title(explain, above_the_drawing=-0.0, fontsize=14,
                         linespacing=1.4, va="top")
     _add_centered_title('Source: https://dataforgood.facebook.com', above_the_drawing=-0.14, fontsize=12)
@@ -79,5 +80,10 @@ def add_legend(data_breaks, county_name):
     patches = selected_county + data_breaks
 
     _ = plt.legend(
-        handles=patches
+        handles=patches,
+        bbox_to_anchor=(0.5, 0.98), loc='center',
+        ncol=10, fontsize=14, columnspacing=1,
+        handlelength=1, handleheight=1,
+        edgecolor=BACKGROUND_COLOR,
+        handletextpad=0.4
     )
