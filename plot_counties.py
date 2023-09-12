@@ -6,6 +6,12 @@ SELECTED_COLOR = "#fa26a0"
 EDGE_COLOR = "#30011E"
 BACKGROUND_COLOR = "#fafafa"
 
+FIG_SIZE_FOR_MY_LARGE_SCREEN = 14, 9
+
+
+def make_transparent(color):
+    return color + "55"
+
 
 def plot_counties_by_connections_to_the_county(county, states, counties, data_breaks):
 
@@ -15,8 +21,11 @@ def plot_counties_by_connections_to_the_county(county, states, counties, data_br
         "axes.facecolor": BACKGROUND_COLOR
     })
 
-    ax = counties.plot(edgecolor=EDGE_COLOR + "55", color=counties.color, figsize=(20, 20))
-    states.plot(ax=ax, edgecolor=EDGE_COLOR, color="None", linewidth=1)
+    ax = counties.plot(edgecolor=make_transparent(EDGE_COLOR),
+                       color=counties.color,
+                       figsize=FIG_SIZE_FOR_MY_LARGE_SCREEN)
+    states.plot(ax=ax, edgecolor=EDGE_COLOR,
+                color="None", linewidth=1)
     ax.set(xlim=(-2600000, None))  # Remove some of the padding to the left of diagram
 
     add_titles(county)
