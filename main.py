@@ -6,6 +6,14 @@ from os.path import isfile
 import geo_info as gi
 import plot_counties as pc
 
+data_breaks = [
+    (90, pc.DISPLAY_GRADIENT_1, "Top 10%"),
+    (70, pc.DISPLAY_GRADIENT_2, "90-70%"),
+    (50, pc.DISPLAY_GRADIENT_3, "70-50%"),
+    (30, pc.DISPLAY_GRADIENT_4, "50-30%"),
+    (0, pc.DISPLAY_GRADIENT_5, "Bottom 30%")
+]
+
 
 def get_us_geo_data(path_to_data: str):
 
@@ -52,7 +60,7 @@ def move_a_state(df, state_to_move: str, new_x, new_y, scale, rotate): # noqa
     return pd.concat([df_other_states, df_state_to_move])
 
 
-def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]:
+def assign_color_based_on_percentile(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]:
     colors = []
     lookup = {p: np.percentile(county_df.value, p) for p, _, _ in data_breaks}
     for _, county in county_df.iterrows():
@@ -63,21 +71,12 @@ def create_color(county_df: pd.DataFrame, data_breaks: list[tuple]) -> list[str]
     return colors
 
 
-data_breaks = [
-    (90, "#00ffff", "Top 10%"),
-    (70, "#00b5ff", "90-70%"),
-    (50, "#6784ff", "70-50%"),
-    (30, "#aeb3fe", "50-30%"),
-    (0, "#e6e5fc", "Bottom 30%")
-]
-
-
 def assign_color_to_counties_by_facebook_connections(counties, facebook_df, county):
     county_facebook_df = facebook_df.df[facebook_df.df.user_loc == county.fips]
 
     counties.loc[:, "value"] = county_facebook_df.set_index("fr_loc").scaled_sci
     counties.loc[:, "value"] = counties["value"].fillna(0)
-    counties.loc[:, "color"] = create_color(counties, data_breaks)
+    counties.loc[:, "color"] = assign_color_based_on_percentile(counties, data_breaks)
     counties.loc[county.fips, "color"] = pc.SELECTED_COLOR
 
     return counties
@@ -100,9 +99,9 @@ def main():
         response = input("county_id: ").strip()
         if response.lower() == "exit":
             break
-        county_id = County(response, counties)
-        counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county_id)
-        pc.plot_counties_by_connections_to_the_county(county_id, states, counties, data_breaks)
+        county = County(response, counties)
+        counties = assign_color_to_counties_by_facebook_connections(counties, facebook_df, county)
+        pc.plot_counties_by_connections_to_the_county(county, states, counties, data_breaks)
 
 
 class County:

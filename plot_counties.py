@@ -2,9 +2,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch, Circle
 
-SELECTED_COLOR = "#fa26a0"
-EDGE_COLOR = "#30011E"
-BACKGROUND_COLOR = "#fafafa"
+SELECTED_COLOR = "#fa26a0"    # #fa26a0  a magneta
+EDGE_COLOR = "#30011E"        # #30011e  a dark black
+BACKGROUND_COLOR = "#fafafa"  # #fafa#fa Gray98, an almost white grey
+DISPLAY_GRADIENT_1 = "#00ffff"
+DISPLAY_GRADIENT_2 = "#00b5ff"
+DISPLAY_GRADIENT_3 = "#6784ff"
+DISPLAY_GRADIENT_4 = "#aeb3fe"
+DISPLAY_GRADIENT_5 = "#e6e5fc"
 
 FIG_SIZE_FOR_MY_LARGE_SCREEN = 14, 9
 
