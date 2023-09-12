@@ -7,9 +7,7 @@ EDGE_COLOR = "#30011E"
 BACKGROUND_COLOR = "#fafafa"
 
 
-def plot_counties_by_connections_to_the_county(county_id, states, counties, data_breaks):
-
-    county_name = counties.loc[county_id.fips].NAME
+def plot_counties_by_connections_to_the_county(county, states, counties, data_breaks):
 
     sns.set_style({
         "font.family": "serif",
@@ -21,9 +19,9 @@ def plot_counties_by_connections_to_the_county(county_id, states, counties, data
     states.plot(ax=ax, edgecolor=EDGE_COLOR, color="None", linewidth=1)
     ax.set(xlim=(-2600000, None))  # Remove some of the padding to the left of diagram
 
-    add_titles(county_id, county_name)
-    add_circle(ax, counties, county_id)
-    add_legend(data_breaks, county_name)
+    add_titles(county)
+    add_circle(ax, county)
+    add_legend(data_breaks, county)
     add_information()
 
     plt.axis("off")
@@ -50,23 +48,22 @@ def add_information():
     _add_centered_title('Source: https://dataforgood.facebook.com', above_the_drawing=-0.14, fontsize=12)
 
 
-def add_titles(county_id, county_name):
+def add_titles(county):
     _add_centered_title(
         "Social Connectedness Ranking Between US Counties and",
         above_the_drawing=1.1, fontsize=16
     )
     _add_centered_title(
-        f"{county_name} (FIPS Code {county_id.fips})",
+        f"{county.name} (FIPS Code {county.fips})",
         above_the_drawing=1.03, fontsize=32
     )
 
 
-def add_circle(ax, counties_df, county_id):
-    center = counties_df[counties_df.index == county_id.fips].geometry.centroid.iloc[0]
+def add_circle(ax, county):
     ax.add_artist(
         Circle(
             radius=100000,
-            xy=(center.x, center.y),
+            xy=(county.center.x, county.center.y),
             facecolor="None",
             edgecolor=SELECTED_COLOR,
             linewidth=4
@@ -74,10 +71,10 @@ def add_circle(ax, counties_df, county_id):
     )
 
 
-def add_legend(data_breaks, county_name):
+def add_legend(data_breaks, county):
     data_breaks = [Patch(facecolor=c, edgecolor=EDGE_COLOR, label=text)
                    for _, c, text in data_breaks]
-    selected_county = [Patch(facecolor=SELECTED_COLOR, edgecolor=EDGE_COLOR, label=county_name)]
+    selected_county = [Patch(facecolor=SELECTED_COLOR, edgecolor=EDGE_COLOR, label=county.name)]
     patches = selected_county + data_breaks
 
     _ = plt.legend(
