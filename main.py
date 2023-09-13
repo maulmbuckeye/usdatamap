@@ -29,7 +29,7 @@ def do_repl_loop(the_data):
         if response == "exit":
             break
         elif response == "random":
-            random_fips = the_data[0].random_fips()
+            random_fips = the_data[0].get_random_fips()
             try_to_plot_a_county(random_fips, the_data, data_breaks)
         else:
             try_to_plot_a_county(response, the_data, data_breaks)

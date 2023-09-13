@@ -11,23 +11,10 @@ class UsGeoData:
         self.geodata = gpd.GeoDataFrame()
         self._get(get_from_cache)
 
-    def _get(self, get_from_cache: bool = True):
-        if get_from_cache and isfile(self._path_to_gzip):
-            self.geodata = self._get_gzip_cache()
-        else:
-            self.geodata = self._produce_from_raw_data()
-
     def plot(self, *args, **kwargs):
         self.geodata.plot(*args, **kwargs)
 
-    def assign_values(self, values):
-        self.geodata.loc[:, "value"] = values
-        self.geodata.loc[:, "value"] = self.geodata["value"].fillna(0)
-
-    def assign_colors(self, colors):
-        self.geodata.loc[:, "color"] = colors
-
-    def random_fips(self):
+    def get_random_fips(self):
         random_county = self.geodata.sample(n=1)
         return random_county.index.values[0]
 
@@ -37,8 +24,41 @@ class UsGeoData:
     def iter_all_counties(self):
         return self.geodata.iterrows()
 
+    def get_name_of(self, fips: str) -> str:
+        if not self.has_this_fips(fips):
+            raise ValueError
+        return self.geodata.loc[fips].NAME
+
+    def has_this_fips(self, fips):
+        return fips in self.geodata.index
+
+    def get_centroid_of(self, fips: str):
+        if not self.has_this_fips(fips):
+            raise ValueError
+        df = self.geodata
+        return df[df.index == fips].geometry.centroid.iloc[0]
+
+    # Assignment are all part coloring which chould be pushed down.
+
+    def assign_values(self, values):
+        self.geodata.loc[:, "value"] = values
+        self.geodata.loc[:, "value"] = self.geodata["value"].fillna(0)
+
+    def assign_colors(self, colors):
+        self.geodata.loc[:, "color"] = colors
+
     def assign_color_to_region(self, fips, color):
+        if not self.has_this_fips(fips):
+            raise ValueError
         self.geodata.loc[fips, "color"] = color
+
+    # Getting data. This should be moved out of here
+
+    def _get(self, get_from_cache: bool = True):
+        if get_from_cache and isfile(self._path_to_gzip):
+            self.geodata = self._get_gzip_cache()
+        else:
+            self.geodata = self._produce_from_raw_data()
 
     def _get_gzip_cache(self):
         print(f"Reading {self._path_to_gzip} ... ", end='')
