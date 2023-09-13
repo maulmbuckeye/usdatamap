@@ -19,7 +19,7 @@ class UsGeoData:
         return random_county.index.values[0]
 
     @property
-    def values(self):
+    def value(self):
         return self._geodata.value
 
     @property
