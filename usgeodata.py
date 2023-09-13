@@ -4,6 +4,15 @@ import pandas as pd
 import geo_info as gi
 
 
+class IndexErrorRegionNotFound(ValueError):
+    def __init__(self, region: str = None, file: str = None):
+        self.region = region
+        self.file = file
+
+    def __repr__(self):
+        return f"IndexErrorRegionNotFound(region={self.region}, file={self.file})"
+
+
 class UsGeoData:
     def __init__(self, path_to_data: str, get_from_cache: bool = True):
         self._path = path_to_data
@@ -31,7 +40,7 @@ class UsGeoData:
 
     def get_name_of(self, fips: str) -> str:
         if not self.has_this_fips(fips):
-            raise ValueError
+            raise IndexErrorRegionNotFound(fips, __file__)
         return self._geodata.loc[fips].NAME
 
     def has_this_fips(self, fips):
@@ -39,7 +48,7 @@ class UsGeoData:
 
     def get_centroid_of(self, fips: str):
         if not self.has_this_fips(fips):
-            raise ValueError
+            raise IndexErrorRegionNotFound(fips, __file__)
         df = self._geodata
         return df[df.index == fips].geometry.centroid.iloc[0]
 
@@ -54,7 +63,7 @@ class UsGeoData:
 
     def assign_color_to_region(self, fips, color):
         if not self.has_this_fips(fips):
-            raise ValueError
+            raise IndexErrorRegionNotFound(fips, __file__)
         self._geodata.loc[fips, "color"] = color
 
     # Getting data. This should be moved out of here
