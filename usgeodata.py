@@ -15,7 +15,7 @@ class UsGeoData:
         if isfile(self._path_to_gzip):
             self.geodata = self._get_gzip_cache()
         else:
-            self.geodata = self._produced_from_raw_data()
+            self.geodata = self._produce_from_raw_data()
 
     def plot(self, *args, **kwargs):
         self.geodata.plot(*args, **kwargs)
@@ -36,7 +36,7 @@ class UsGeoData:
         print("DONE")
         return geodata
 
-    def _produced_from_raw_data(self):
+    def _produce_from_raw_data(self):
         print(f"Reading {self._path} ... ", end='')
         self.geodata = gpd.read_file(self._path)
         print("DONE")

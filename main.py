@@ -8,10 +8,18 @@ import usgeodata as usgd
 
 
 def main():
+    the_data = get_data()
+    do_repl_loop(the_data)
+
+
+def get_data() -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
     counties = usgd.UsGeoData("./data/cb_2018_us_county_500k")
     states = usgd.UsGeoData("./data/cb_2018_us_state_500k")
     facebook = fbc.FacebookConnections()
+    return counties, states, facebook
 
+
+def do_repl_loop(the_data):
     print("\nProvide the 5 character FPs for the county (2 for state, 3 for county)")
     print("An example for Warren County, OH:")
     print("\t39165")
@@ -20,14 +28,19 @@ def main():
         response = input("county_id: ").strip()
         if response.lower() == "exit":
             break
-        try:
-            the_county = c.County(response, counties.geodata) # noqa
-            counties.geodata = assign_color_to_counties_by_facebook_connections(
-                counties, facebook, the_county)
-            pc.plot_counties_by_connections_to_the_county(
-                the_county, states, counties.geodata, data_breaks)
-        except ValueError:
-            print(f"\t[[{response}]] is a not a valid FIPS")
+        try_to_plot_a_county(response, the_data, data_breaks)
+
+
+def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
+    counties, states, facebook = the_data
+    try:
+        the_county = c.County(candidate_county, counties.geodata)  # noqa
+        counties.geodata = assign_color_to_counties_by_facebook_connections(
+            counties, facebook, the_county)
+        pc.plot_counties_by_connections_to_the_county(
+            the_county, states, counties.geodata, p_data_breaks)
+    except ValueError:
+        print(f"\t[[{candidate_county}]] is a not a valid FIPS")
 
 
 def assign_color_to_counties_by_facebook_connections(counties: usgd.UsGeoData,
