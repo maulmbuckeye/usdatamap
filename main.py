@@ -1,9 +1,8 @@
 import numpy as np
-import pandas as pd
 
-import plot_counties as pc
-import facebook_connections as fbc
 import county as c
+import facebook_connections as fbc
+import plot_counties as pc
 import usgeodata as usgd
 
 
@@ -40,7 +39,7 @@ def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
     counties, states, facebook = the_data
     try:
         the_county = c.County(candidate_county, counties.geodata)  # noqa
-        counties.geodata = assign_color_to_counties_by_facebook_connections(
+        counties = assign_color_to_counties_by_facebook_connections(
             counties, facebook, the_county)
         pc.plot_counties_by_connections_to_the_county(
             the_county, states, counties.geodata, p_data_breaks)
@@ -48,14 +47,16 @@ def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
         print(f"\t[[{candidate_county}]] is a not a valid FIPS")
 
 
-def assign_color_to_counties_by_facebook_connections(counties: usgd.UsGeoData,
-                                                     facebook: fbc.FacebookConnections,
-                                                     the_county: c.County) -> pd.DataFrame:
+def assign_color_to_counties_by_facebook_connections(
+        counties: usgd.UsGeoData,
+        facebook: fbc.FacebookConnections,
+        the_county: c.County) -> usgd.UsGeoData:
+
     counties.assign_values(facebook.get_number_of_connections_from_county(the_county.fips))
-    counties.assign_colors(assign_color_based_on_percentile(counties, data_breaks))
+    counties.assign_colors(select_color_based_on_percentile(counties, data_breaks))
     counties.assign_color_to_region(the_county.fips, pc.SELECTED_COLOR)
 
-    return counties.geodata
+    return counties
 
 
 data_breaks = [
@@ -67,12 +68,16 @@ data_breaks = [
 ]
 
 
-def assign_color_based_on_percentile(counties: usgd.UsGeoData, p_data_breaks: list[tuple]) -> list[str]:
-    colors: list[str] = []
+def select_color_based_on_percentile(
+        counties: usgd.UsGeoData,
+        p_data_breaks: list[tuple]) -> list[str]:
+
     value_for_percentile = {
         percentile: np.percentile(counties.get_values(), percentile)
         for percentile, _, _ in p_data_breaks
     }
+
+    colors: list[str] = []
     for _, county in counties.iter_all_counties():
         for percentile, color, _ in p_data_breaks:
             if county.value >= value_for_percentile[percentile]:
