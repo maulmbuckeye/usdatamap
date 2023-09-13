@@ -4,7 +4,7 @@ import pandas as pd
 import geo_info as gi
 
 
-class IndexErrorRegionNotFound(ValueError):
+class IndexErrorRegionNotFound(IndexError):
     def __init__(self, region: str = None, file: str = None):
         self.region = region
         self.file = file
