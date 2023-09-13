@@ -7,7 +7,8 @@ class FacebookConnections:
     FACEBOOK_DATA_TSV = "./data/county_county.tsv"
 
     def __init__(self):
-        pass
+        self.df = pd.DataFrame()
+        self.get()
 
     def get_connections(self, fips: str) -> pd.DataFrame:
         return self.df[self.df.user_loc == fips]

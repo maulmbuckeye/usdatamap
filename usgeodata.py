@@ -7,10 +7,11 @@ import geo_info as gi
 class UsGeoData:
     def __init__(self, path_to_data: str):
         self._path = path_to_data
-        self.geodata = gpd.GeoDataFrame()
         self._path_to_gzip = self._path + ".gzip"
+        self.geodata = gpd.GeoDataFrame()
+        self._get()
 
-    def get(self):
+    def _get(self):
         if isfile(self._path_to_gzip):
             self.geodata = self._get_gzip_cache()
         else:
@@ -71,4 +72,3 @@ class UsGeoData:
         df.loc[:, "geometry"] = df.geometry.rotate(rotate, origin=center)
 
         return df
-

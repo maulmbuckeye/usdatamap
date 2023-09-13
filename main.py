@@ -8,14 +8,9 @@ import usgeodata as usgd
 
 
 def main():
-    # counties = get_us_geo_data("./data/cb_2018_us_county_500k")
     counties = usgd.UsGeoData("./data/cb_2018_us_county_500k")
-    counties.get()
     states = usgd.UsGeoData("./data/cb_2018_us_state_500k")
-    states.get()
-    # states = get_us_geo_data("./data/cb_2018_us_state_500k")
     facebook = fbc.FacebookConnections()
-    facebook.get()
 
     print("\nProvide the 5 character FPs for the county (2 for state, 3 for county)")
     print("An example for Warren County, OH:")
