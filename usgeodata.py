@@ -34,6 +34,9 @@ class UsGeoData:
     def get_values(self):
         return self.geodata.value
 
+    def iter_all_counties(self):
+        return self.geodata.iterrows()
+
     def assign_color_to_region(self, fips, color):
         self.geodata.loc[fips, "color"] = color
 

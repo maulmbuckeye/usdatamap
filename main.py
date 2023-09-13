@@ -67,14 +67,13 @@ data_breaks = [
 ]
 
 
-def assign_color_based_on_percentile(usgd_counties: usgd.UsGeoData, p_data_breaks: list[tuple]) -> list[str]:
+def assign_color_based_on_percentile(counties: usgd.UsGeoData, p_data_breaks: list[tuple]) -> list[str]:
     colors: list[str] = []
     value_for_percentile = {
-        percentile: np.percentile(usgd_counties.get_values(), percentile)
+        percentile: np.percentile(counties.get_values(), percentile)
         for percentile, _, _ in p_data_breaks
     }
-    counties = usgd_counties.geodata
-    for _, county in counties.iterrows():
+    for _, county in counties.iter_all_counties():
         for percentile, color, _ in p_data_breaks:
             if county.value >= value_for_percentile[percentile]:
                 colors.append(color)
