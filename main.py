@@ -52,7 +52,7 @@ def assign_color_to_counties_by_facebook_connections(counties: usgd.UsGeoData,
                                                      facebook: fbc.FacebookConnections,
                                                      the_county: c.County) -> pd.DataFrame:
     counties.assign_values(facebook.get_number_of_connections_from_county(the_county.fips))
-    counties.assign_colors(assign_color_based_on_percentile(counties.geodata, data_breaks))
+    counties.assign_colors(assign_color_based_on_percentile(counties, data_breaks))
     counties.assign_color_to_region(the_county.fips, pc.SELECTED_COLOR)
 
     return counties.geodata
@@ -67,10 +67,13 @@ data_breaks = [
 ]
 
 
-def assign_color_based_on_percentile(counties: pd.DataFrame, p_data_breaks: list[tuple]) -> list[str]:
+def assign_color_based_on_percentile(usgd_counties: usgd.UsGeoData, p_data_breaks: list[tuple]) -> list[str]:
     colors: list[str] = []
-    value_for_percentile = {percentile: np.percentile(counties.value, percentile)
-                            for percentile, _, _ in p_data_breaks}
+    value_for_percentile = {
+        percentile: np.percentile(usgd_counties.get_values(), percentile)
+        for percentile, _, _ in p_data_breaks
+    }
+    counties = usgd_counties.geodata
     for _, county in counties.iterrows():
         for percentile, color, _ in p_data_breaks:
             if county.value >= value_for_percentile[percentile]:

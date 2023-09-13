@@ -31,6 +31,9 @@ class UsGeoData:
         random_county = self.geodata.sample(n=1)
         return random_county.index.values[0]
 
+    def get_values(self):
+        return self.geodata.value
+
     def assign_color_to_region(self, fips, color):
         self.geodata.loc[fips, "color"] = color
 
