@@ -8,13 +8,14 @@ import usgeodata as usgd
 
 
 def main():
-    the_data = get_data()
+    the_data = get_data(get_from_cache=True)
     do_repl_loop(the_data)
 
 
-def get_data() -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
-    counties = usgd.UsGeoData("./data/cb_2018_us_county_500k")
-    states = usgd.UsGeoData("./data/cb_2018_us_state_500k")
+def get_data(get_from_cache: bool = True) \
+        -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
+    counties = usgd.UsGeoData("./data/cb_2018_us_county_500k", get_from_cache)
+    states = usgd.UsGeoData("./data/cb_2018_us_state_500k", get_from_cache)
     facebook = fbc.FacebookConnections()
     return counties, states, facebook
 

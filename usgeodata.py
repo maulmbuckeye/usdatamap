@@ -5,14 +5,14 @@ import geo_info as gi
 
 
 class UsGeoData:
-    def __init__(self, path_to_data: str):
+    def __init__(self, path_to_data: str, get_from_cache: bool = True):
         self._path = path_to_data
         self._path_to_gzip = self._path + ".gzip"
         self.geodata = gpd.GeoDataFrame()
-        self._get()
+        self._get(get_from_cache)
 
-    def _get(self):
-        if isfile(self._path_to_gzip):
+    def _get(self, get_from_cache: bool = True):
+        if get_from_cache and isfile(self._path_to_gzip):
             self.geodata = self._get_gzip_cache()
         else:
             self.geodata = self._produce_from_raw_data()
