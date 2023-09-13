@@ -38,11 +38,16 @@ def do_repl_loop(the_data):
 def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
     counties, states, facebook = the_data
     try:
-        the_county = c.County(candidate_county, counties.geodata)  # noqa
+        the_county = c.County(candidate_county, counties)
         counties = assign_color_to_counties_by_facebook_connections(
-            counties, facebook, the_county)
+            counties,
+            facebook,
+            the_county)
         pc.plot_counties_by_connections_to_the_county(
-            the_county, states, counties.geodata, p_data_breaks)
+            the_county,
+            states,
+            counties.geodata,
+            p_data_breaks)
     except ValueError:
         print(f"\t[[{candidate_county}]] is a not a valid FIPS")
 
