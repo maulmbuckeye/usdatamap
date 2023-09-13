@@ -24,12 +24,16 @@ def do_repl_loop(the_data):
     print("\nProvide the 5 character FPs for the county (2 for state, 3 for county)")
     print("An example for Warren County, OH:")
     print("\t39165")
-    print("Reponse with 'exit' to exit")
+    print("Reponse with 'exit' to exit; 'random' for random county.")
     while True:
-        response = input("county_id: ").strip()
-        if response.lower() == "exit":
+        response = input("county_id: ").strip().lower()
+        if response == "exit":
             break
-        try_to_plot_a_county(response, the_data, data_breaks)
+        elif response == "random":
+            random_fips = the_data[0].random_fips()
+            try_to_plot_a_county(random_fips, the_data, data_breaks)
+        else:
+            try_to_plot_a_county(response, the_data, data_breaks)
 
 
 def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
