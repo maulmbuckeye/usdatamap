@@ -78,7 +78,7 @@ def select_color_based_on_percentile(
         p_data_breaks: list[tuple]) -> list[str]:
 
     value_for_percentile = {
-        percentile: np.percentile(counties.get_values(), percentile)
+        percentile: np.percentile(counties.values, percentile)
         for percentile, _, _ in p_data_breaks
     }
 

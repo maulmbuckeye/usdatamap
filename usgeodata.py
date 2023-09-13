@@ -18,7 +18,8 @@ class UsGeoData:
         random_county = self._geodata.sample(n=1)
         return random_county.index.values[0]
 
-    def get_values(self):
+    @property
+    def values(self):
         return self._geodata.value
 
     @property
