@@ -46,7 +46,7 @@ def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
         pc.plot_counties_by_connections_to_the_county(
             the_county,
             states,
-            counties.geodata,
+            counties,
             p_data_breaks)
     except ValueError:
         print(f"\t[[{candidate_county}]] is a not a valid FIPS")

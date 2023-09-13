@@ -8,57 +8,61 @@ class UsGeoData:
     def __init__(self, path_to_data: str, get_from_cache: bool = True):
         self._path = path_to_data
         self._path_to_gzip = self._path + ".gzip"
-        self.geodata = gpd.GeoDataFrame()
+        self._geodata = gpd.GeoDataFrame()
         self._get(get_from_cache)
 
     def plot(self, *args, **kwargs):
-        self.geodata.plot(*args, **kwargs)
+        return self._geodata.plot(*args, **kwargs)
 
     def get_random_fips(self):
-        random_county = self.geodata.sample(n=1)
+        random_county = self._geodata.sample(n=1)
         return random_county.index.values[0]
 
     def get_values(self):
-        return self.geodata.value
+        return self._geodata.value
+
+    @property
+    def color(self):
+        return self._geodata.color
 
     def iter_all_counties(self):
-        return self.geodata.iterrows()
+        return self._geodata.iterrows()
 
     def get_name_of(self, fips: str) -> str:
         if not self.has_this_fips(fips):
             raise ValueError
-        return self.geodata.loc[fips].NAME
+        return self._geodata.loc[fips].NAME
 
     def has_this_fips(self, fips):
-        return fips in self.geodata.index
+        return fips in self._geodata.index
 
     def get_centroid_of(self, fips: str):
         if not self.has_this_fips(fips):
             raise ValueError
-        df = self.geodata
+        df = self._geodata
         return df[df.index == fips].geometry.centroid.iloc[0]
 
     # Assignment are all part coloring which chould be pushed down.
 
     def assign_values(self, values):
-        self.geodata.loc[:, "value"] = values
-        self.geodata.loc[:, "value"] = self.geodata["value"].fillna(0)
+        self._geodata.loc[:, "value"] = values
+        self._geodata.loc[:, "value"] = self._geodata["value"].fillna(0)
 
     def assign_colors(self, colors):
-        self.geodata.loc[:, "color"] = colors
+        self._geodata.loc[:, "color"] = colors
 
     def assign_color_to_region(self, fips, color):
         if not self.has_this_fips(fips):
             raise ValueError
-        self.geodata.loc[fips, "color"] = color
+        self._geodata.loc[fips, "color"] = color
 
     # Getting data. This should be moved out of here
 
     def _get(self, get_from_cache: bool = True):
         if get_from_cache and isfile(self._path_to_gzip):
-            self.geodata = self._get_gzip_cache()
+            self._geodata = self._get_gzip_cache()
         else:
-            self.geodata = self._produce_from_raw_data()
+            self._geodata = self._produce_from_raw_data()
 
     def _get_gzip_cache(self):
         print(f"Reading {self._path_to_gzip} ... ", end='')
@@ -68,27 +72,27 @@ class UsGeoData:
 
     def _produce_from_raw_data(self):
         print(f"Reading {self._path} ... ", end='')
-        self.geodata = gpd.read_file(self._path)
+        self._geodata = gpd.read_file(self._path)
         print("DONE")
-        self.geodata = self.geodata.set_index("GEOID")
+        self._geodata = self._geodata.set_index("GEOID")
 
-        self.geodata = self.geodata[~self.geodata.STATEFP.isin(gi.UNINCORPORATED_TERRORIES)]
+        self._geodata = self._geodata[~self._geodata.STATEFP.isin(gi.UNINCORPORATED_TERRORIES)]
 
         # Change projection, i.e., Coordinate Reference Systems
         # https://geopandas.org/en/stable/docs/user_guide/projections.html
-        self.geodata = self.geodata.to_crs("ESRI:102003")
+        self._geodata = self._geodata.to_crs("ESRI:102003")
 
-        self.geodata = self._move_a_state(gi.ALASKA, 1300000, -4900000, 0.5, 32)
-        self.geodata = self._move_a_state(gi.HAWAII, 5400000, -1500000, 1, 24)
+        self._geodata = self._move_a_state(gi.ALASKA, 1300000, -4900000, 0.5, 32)
+        self._geodata = self._move_a_state(gi.HAWAII, 5400000, -1500000, 1, 24)
 
-        self.geodata.to_parquet(self._path_to_gzip)
+        self._geodata.to_parquet(self._path_to_gzip)
 
-        return self.geodata
+        return self._geodata
 
     def _move_a_state(self, state_to_move: str,
                       new_x, new_y, scale, rotate) -> gpd.GeoDataFrame:  # noqa
-        df_state_to_move = self.geodata[self.geodata.STATEFP == state_to_move]
-        df_other_states = self.geodata[~self.geodata.STATEFP.isin([state_to_move])]
+        df_state_to_move = self._geodata[self._geodata.STATEFP == state_to_move]
+        df_other_states = self._geodata[~self._geodata.STATEFP.isin([state_to_move])]
 
         df_state_to_move = self._translate_geometries(df_state_to_move, new_x, new_y, scale, rotate)
 
