@@ -30,7 +30,7 @@ def plot_counties_by_connections_to_the_county(county, states, counties, data_br
                        color=counties.color,
                        figsize=FIG_SIZE_FOR_MY_LARGE_SCREEN)
     states.plot(ax=ax, edgecolor=EDGE_COLOR,
-                color="None", linewidth=1)
+                        color="None", linewidth=1)
     ax.set(xlim=(-2600000, None))  # Remove some of the padding to the left of diagram
 
     add_titles(county)
