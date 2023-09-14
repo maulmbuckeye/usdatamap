@@ -6,7 +6,6 @@ import usgeodata as usgd
 
 
 class UsGeoDataFactory:
-
     def __init__(self):
         self._path = ''
         self._path_to_gzip = ''
@@ -36,7 +35,7 @@ class UsGeoDataFactory:
         print("DONE")
         geodata.set_index("GEOID", inplace=True)
 
-        self._geodata = UsGeoDataFactory._remove_states(geodata, gi.UNINCORPORATED_TERRORIES)
+        self._geodata = _remove_states(geodata, gi.UNINCORPORATED_TERRORIES)
 
         # Change projection, i.e., Coordinate Reference Systems
         # https://geopandas.org/en/stable/docs/user_guide/projections.html
@@ -50,29 +49,28 @@ class UsGeoDataFactory:
     def _move_a_state(self, a_state: str,
                       new_x, new_y, scale, rotate):
         geodata = self._geodata
-        state_to_move: gpd.GeoDataFrame = UsGeoDataFactory._keep_states(geodata, [a_state])
-        other_states: gpd.GeoDataFrame = UsGeoDataFactory._remove_states(geodata, [a_state])
+        state_to_move: gpd.GeoDataFrame = _keep_states(geodata, [a_state])
+        other_states: gpd.GeoDataFrame = _remove_states(geodata, [a_state])
 
-        UsGeoDataFactory._update_geometry(state_to_move, new_x, new_y, scale, rotate)
+        _update_geometry(state_to_move, new_x, new_y, scale, rotate)
 
         # No gpd.concat. Using pandas.concat instead, per
         # https://geopandas.org/en/stable/docs/user_guide/mergingdata.html.
         self._geodata = gpd.GeoDataFrame(pd.concat([other_states, state_to_move]))
 
-    @staticmethod
-    def _update_geometry(region: gpd.GeoDataFrame, x, y, scale, rotate):
 
-        region.loc[:, "geometry"] = region.geometry.translate(xoff=x, yoff=y)
-        center = region.dissolve().centroid.iloc[0]
-        region.loc[:, "geometry"] = region.geometry.scale(xfact=scale, yfact=scale, origin=center)
-        region.loc[:, "geometry"] = region.geometry.rotate(rotate, origin=center)
+def _update_geometry(region: gpd.GeoDataFrame, x, y, scale, rotate):
+    region.loc[:, "geometry"] = region.geometry.translate(xoff=x, yoff=y)
+    center = region.dissolve().centroid.iloc[0]
+    region.loc[:, "geometry"] = region.geometry.scale(xfact=scale, yfact=scale, origin=center)
+    region.loc[:, "geometry"] = region.geometry.rotate(rotate, origin=center)
 
-    @classmethod
-    def _remove_states(cls, gdf: gpd.GeoDataFrame,
-                       states_to_exclude: list[str]) -> gpd.GeoDataFrame:
-        return gdf[~gdf.STATEFP.isin(states_to_exclude)]
 
-    @classmethod
-    def _keep_states(cls, gdf: gpd.GeoDataFrame,
-                     states_to_keep: list[str]) -> gpd.GeoDataFrame:
-        return gdf[gdf.STATEFP.isin(states_to_keep)]
+def _remove_states(gdf: gpd.GeoDataFrame,
+                   states_to_exclude: list[str]) -> gpd.GeoDataFrame:
+    return gdf[~gdf.STATEFP.isin(states_to_exclude)]
+
+
+def _keep_states(gdf: gpd.GeoDataFrame,
+                 states_to_keep: list[str]) -> gpd.GeoDataFrame:
+    return gdf[gdf.STATEFP.isin(states_to_keep)]
