@@ -1,14 +1,30 @@
 import numpy as np
 
-import county as c
+import county as cty
 import facebook_connections as fbc
 import plot_counties as pc
 import usgeodata as usgd
 import usgeodatafactory as ugfac
 
 
+class GeoConnections:
+    def __init__(self, c, s, f):
+        self.counties = c
+        self.states = s
+        self.facebook = f
+
+    def set(self, c, s, f):
+        self.counties = c
+        self.states = s
+        self.facebook = f
+
+    @property
+    def values(self):
+        return self.counties, self.states, self.facebook
+
+
 def main():
-    the_data = get_data(try_cache=True)
+    the_data = GeoConnections(*get_data(try_cache=True))
     do_repl_loop(the_data)
 
 
@@ -31,18 +47,18 @@ def do_repl_loop(the_data):
         if response == "exit":
             break
         elif response == "random":
-            random_fips = the_data[0].get_random_fips()
+            random_fips = the_data.counties.get_random_fips()
             try_to_plot_a_county(random_fips, the_data, data_breaks)
         elif response == "refresh":
-            the_data = get_data(try_cache=False)
+            the_data.set(*get_data(try_cache=False))
         else:
             try_to_plot_a_county(response, the_data, data_breaks)
 
 
 def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
-    counties, states, facebook = the_data
+    counties, states, facebook = the_data.values
     try:
-        the_county = c.County(candidate_county, counties)
+        the_county = cty.County(candidate_county, counties)
     except usgd.IndexErrorRegionNotFound:
         print(f"\t[[{candidate_county}]] is a not a valid FIPS")
         return
@@ -61,7 +77,7 @@ def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
 def assign_color_to_counties_by_facebook_connections(
         counties: usgd.UsCountiesData,
         facebook: fbc.FacebookConnections,
-        the_county: c.County) -> usgd.UsGeoData:
+        the_county: cty.County) -> usgd.UsGeoData:
 
     counties.assign_values(facebook.get_number_of_connections_from_county(the_county.fips))
     counties.assign_colors(select_color_based_on_percentile(counties, data_breaks))
