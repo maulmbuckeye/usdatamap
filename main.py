@@ -27,6 +27,23 @@ class GeoConnections:
         self.counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
         self.facebook = fbc.FacebookConnections()
 
+    def try_to_plot_a_county(self, candidate_county, p_data_breaks):
+        try:
+            the_county = cty.County(candidate_county, self.counties)
+        except usgd.IndexErrorRegionNotFound:
+            print(f"\t[[{candidate_county}]] is a not a valid FIPS")
+            return
+
+        self.counties = assign_color_to_counties_by_facebook_connections(
+            self.counties,
+            self.facebook,
+            the_county)
+        pc.plot_counties_by_connections_to_the_county(
+            the_county,
+            self.states,
+            self.counties,
+            p_data_breaks)
+
 
 def main():
     the_data = GeoConnections(try_cache=True)
@@ -44,11 +61,11 @@ def do_repl_loop(the_data):
             break
         elif response == "random":
             random_fips = the_data.get_random_county()
-            try_to_plot_a_county(random_fips, the_data, data_breaks)
+            the_data.try_to_plot_a_county(random_fips, data_breaks)
         elif response == "refresh":
             the_data.get_data(try_cache=False)
         else:
-            try_to_plot_a_county(response, the_data, data_breaks)
+            the_data.try_to_plot_a_county(response, data_breaks)
 
 
 def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
