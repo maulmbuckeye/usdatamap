@@ -4,6 +4,7 @@ import county as c
 import facebook_connections as fbc
 import plot_counties as pc
 import usgeodata as usgd
+import usgeodatafactory as ugfac
 
 
 def main():
@@ -13,7 +14,7 @@ def main():
 
 def get_data(try_cache: bool = True) \
         -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
-    fac = usgd.UsGeoDataFactory()
+    fac = ugfac.UsGeoDataFactory()
     states = fac.get("./data/cb_2018_us_state_500k", try_cache)
     counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
     facebook = fbc.FacebookConnections()
@@ -58,7 +59,7 @@ def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
 
 
 def assign_color_to_counties_by_facebook_connections(
-        counties: usgd.UsGeoData,
+        counties: usgd.UsCountiesData,
         facebook: fbc.FacebookConnections,
         the_county: c.County) -> usgd.UsGeoData:
 
@@ -79,7 +80,7 @@ data_breaks = [
 
 
 def select_color_based_on_percentile(
-        counties: usgd.UsGeoData,
+        counties: usgd.UsCountiesData,
         p_data_breaks: list[tuple]) -> list[str]:
 
     value_for_percentile = {
