@@ -8,10 +8,11 @@ import usgeodatafactory as ugfac
 
 
 class GeoConnections:
-    def __init__(self, c, s, f):
-        self.counties = c
-        self.states = s
-        self.facebook = f
+    def __init__(self, try_cache=True):
+        self.counties = None
+        self.states = None
+        self.facebook = None
+        self.get_data(try_cache)
 
     def set(self, c, s, f):
         self.counties = c
@@ -22,19 +23,18 @@ class GeoConnections:
     def values(self):
         return self.counties, self.states, self.facebook
 
+    def get_data(self, try_cache: bool = True) \
+            -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
+        fac = ugfac.UsGeoDataFactory()
+        self.states = fac.get("./data/cb_2018_us_state_500k", try_cache)
+        self.counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
+        self.facebook = fbc.FacebookConnections()
+        return self.counties, self.states, self.facebook
+
 
 def main():
-    the_data = GeoConnections(*get_data(try_cache=True))
+    the_data = GeoConnections(try_cache=True)
     do_repl_loop(the_data)
-
-
-def get_data(try_cache: bool = True) \
-        -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
-    fac = ugfac.UsGeoDataFactory()
-    states = fac.get("./data/cb_2018_us_state_500k", try_cache)
-    counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
-    facebook = fbc.FacebookConnections()
-    return counties, states, facebook
 
 
 def do_repl_loop(the_data):
@@ -50,7 +50,7 @@ def do_repl_loop(the_data):
             random_fips = the_data.counties.get_random_fips()
             try_to_plot_a_county(random_fips, the_data, data_breaks)
         elif response == "refresh":
-            the_data.set(*get_data(try_cache=False))
+            the_data.get_data(try_cache=False)
         else:
             try_to_plot_a_county(response, the_data, data_breaks)
 
