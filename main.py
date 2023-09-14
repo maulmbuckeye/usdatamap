@@ -9,15 +9,11 @@ import usgeodatafactory as ugfac
 
 class GeoConnections:
     def __init__(self, try_cache=True):
+        self.fac = ugfac.UsGeoDataFactory()
         self.counties = None
         self.states = None
         self.facebook = None
         self.get_data(try_cache)
-        self.fac = ugfac.UsGeoDataFactory()
-
-    @property
-    def values(self):
-        return self.counties, self.states, self.facebook
 
     def get_random_county(self):
         return self.counties.get_random_fips()
@@ -34,15 +30,21 @@ class GeoConnections:
             print(f"\t[[{candidate_county}]] is a not a valid FIPS")
             return
 
-        self.counties = assign_color_to_counties_by_facebook_connections(
-            self.counties,
-            self.facebook,
-            the_county)
+        self._update_county_color_using_fb_connections(the_county)
         pc.plot_counties_by_connections_to_the_county(
             the_county,
             self.states,
             self.counties,
             p_data_breaks)
+
+    def _update_county_color_using_fb_connections(self, the_county: cty.County):
+        counties = self.counties
+        facebook = self.facebook
+        counties.assign_values(facebook.get_number_of_connections_from_county(the_county.fips))
+        counties.assign_colors(select_color_based_on_percentile(counties, data_breaks))
+        counties.assign_color_to_region(the_county.fips, pc.SELECTED_COLOR)
+
+        self.counties = counties
 
 
 def main():
@@ -60,8 +62,8 @@ def do_repl_loop(geo_connect):
         if response == "exit":
             break
         elif response == "random":
-            random_fips = geo_connect.get_random_county()
-            geo_connect.plot_a_county(random_fips, data_breaks)
+            random_county = geo_connect.get_random_county()
+            geo_connect.plot_a_county(random_county, data_breaks)
         elif response == "refresh":
             geo_connect.get_data(try_cache=False)
         else:
