@@ -13,8 +13,9 @@ def main():
 
 def get_data(try_cache: bool = True) \
         -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
-    states = usgd.UsGeoData("./data/cb_2018_us_state_500k", try_cache)
-    counties = usgd.UsCountiesData("./data/cb_2018_us_county_500k", try_cache)
+    fac = usgd.UsGeoDataFactory()
+    states = fac.get("./data/cb_2018_us_state_500k", try_cache)
+    counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
     facebook = fbc.FacebookConnections()
     return counties, states, facebook
 
