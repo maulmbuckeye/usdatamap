@@ -13,21 +13,21 @@ class GeoConnections:
         self.states = None
         self.facebook = None
         self.get_data(try_cache)
+        self.fac = ugfac.UsGeoDataFactory()
 
     @property
     def values(self):
         return self.counties, self.states, self.facebook
 
     def get_random_county(self):
-       return self.counties.get_random_fips()
+        return self.counties.get_random_fips()
 
     def get_data(self, try_cache: bool = True):
-        fac = ugfac.UsGeoDataFactory()
-        self.states = fac.get("./data/cb_2018_us_state_500k", try_cache)
-        self.counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
+        self.states = self.fac.get("./data/cb_2018_us_state_500k", try_cache)
+        self.counties = self.fac.get("./data/cb_2018_us_county_500k", try_cache)
         self.facebook = fbc.FacebookConnections()
 
-    def try_to_plot_a_county(self, candidate_county, p_data_breaks):
+    def plot_a_county(self, candidate_county, p_data_breaks):
         try:
             the_county = cty.County(candidate_county, self.counties)
         except usgd.IndexErrorRegionNotFound:
@@ -46,11 +46,11 @@ class GeoConnections:
 
 
 def main():
-    the_data = GeoConnections(try_cache=True)
-    do_repl_loop(the_data)
+    geo_connect = GeoConnections(try_cache=True)
+    do_repl_loop(geo_connect)
 
 
-def do_repl_loop(the_data):
+def do_repl_loop(geo_connect):
     print("\nProvide the 5 character FPs for the county (2 for state, 3 for county)")
     print("An example for Warren County, OH:")
     print("\t39165")
@@ -60,31 +60,12 @@ def do_repl_loop(the_data):
         if response == "exit":
             break
         elif response == "random":
-            random_fips = the_data.get_random_county()
-            the_data.try_to_plot_a_county(random_fips, data_breaks)
+            random_fips = geo_connect.get_random_county()
+            geo_connect.plot_a_county(random_fips, data_breaks)
         elif response == "refresh":
-            the_data.get_data(try_cache=False)
+            geo_connect.get_data(try_cache=False)
         else:
-            the_data.try_to_plot_a_county(response, data_breaks)
-
-
-def try_to_plot_a_county(candidate_county, the_data, p_data_breaks):
-    counties, states, facebook = the_data.values
-    try:
-        the_county = cty.County(candidate_county, counties)
-    except usgd.IndexErrorRegionNotFound:
-        print(f"\t[[{candidate_county}]] is a not a valid FIPS")
-        return
-
-    counties = assign_color_to_counties_by_facebook_connections(
-        counties,
-        facebook,
-        the_county)
-    pc.plot_counties_by_connections_to_the_county(
-        the_county,
-        states,
-        counties,
-        p_data_breaks)
+            geo_connect.plot_a_county(response, data_breaks)
 
 
 def assign_color_to_counties_by_facebook_connections(
