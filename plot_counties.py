@@ -77,7 +77,7 @@ def add_circle(ax, county):
     ax.add_artist(
         Circle(
             radius=100000,
-            xy=(county.centriod.x, county.centriod.y),
+            xy=county.center_xy,
             facecolor="None",
             edgecolor=SELECTED_COLOR,
             linewidth=4

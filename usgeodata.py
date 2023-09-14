@@ -46,11 +46,12 @@ class UsGeoData:
     def has_this_fips(self, fips):
         return fips in self._geodata.index
 
-    def get_centroid_of(self, fips: str):
+    def get_center_xy_of(self, fips: str) -> tuple[float, float]:
         if not self.has_this_fips(fips):
             raise IndexErrorRegionNotFound(fips, __file__)
         df = self._geodata
-        return df[df.index == fips].geometry.centroid.iloc[0]
+        centroid = df[df.index == fips].geometry.centroid.iloc[0]
+        return centroid.x, centroid.y
 
     # The "assign" method are all part coloring which chould be pushed in subclass
 
