@@ -14,7 +14,7 @@ def main():
 def get_data(try_cache: bool = True) \
         -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
     states = usgd.UsGeoData("./data/cb_2018_us_state_500k", try_cache)
-    counties = usgd.UsGeoData("./data/cb_2018_us_county_500k", try_cache)
+    counties = usgd.UsCountiesData("./data/cb_2018_us_county_500k", try_cache)
     facebook = fbc.FacebookConnections()
     return counties, states, facebook
 
@@ -23,7 +23,7 @@ def do_repl_loop(the_data):
     print("\nProvide the 5 character FPs for the county (2 for state, 3 for county)")
     print("An example for Warren County, OH:")
     print("\t39165")
-    print("Reponse with 'exit' to exit; 'random' for random county.")
+    print("Reponsd with 'exit' to exit; 'random' for random county; 'refresh' to get uncached data")
     while True:
         response = input("county_id: ").strip().lower()
         if response == "exit":
@@ -31,6 +31,8 @@ def do_repl_loop(the_data):
         elif response == "random":
             random_fips = the_data[0].get_random_fips()
             try_to_plot_a_county(random_fips, the_data, data_breaks)
+        elif response == "refresh":
+            the_data = get_data(try_cache=False)
         else:
             try_to_plot_a_county(response, the_data, data_breaks)
 
