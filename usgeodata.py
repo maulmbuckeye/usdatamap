@@ -14,11 +14,11 @@ class IndexErrorRegionNotFound(IndexError):
 
 
 class UsGeoData:
-    def __init__(self, path_to_data: str, get_from_cache: bool = True):
+    def __init__(self, path_to_data: str, try_cache: bool = True):
         self._path = path_to_data
         self._path_to_gzip = self._path + ".gzip"
         self._geodata = gpd.GeoDataFrame()
-        self._get(get_from_cache)
+        self._get(try_cache)
 
     def plot(self, *args, **kwargs):
         return self._geodata.plot(*args, **kwargs)
@@ -52,7 +52,7 @@ class UsGeoData:
         df = self._geodata
         return df[df.index == fips].geometry.centroid.iloc[0]
 
-    # Assignment are all part coloring which chould be pushed down.
+    # The "assign" method are all part coloring which chould be pushed in subclass
 
     def assign_values(self, values):
         self._geodata.loc[:, "value"] = values
@@ -68,51 +68,61 @@ class UsGeoData:
 
     # Getting data. This should be moved out of here
 
-    def _get(self, get_from_cache: bool = True):
-        if get_from_cache and isfile(self._path_to_gzip):
-            self._geodata = self._get_gzip_cache()
+    def _get(self, try_cache: bool = True):
+        if try_cache and isfile(self._path_to_gzip):
+            self._get_gzip_cache()
         else:
-            self._geodata = self._produce_from_raw_data()
+            self._produce_from_raw_data()
 
     def _get_gzip_cache(self):
         print(f"Reading {self._path_to_gzip} ... ", end='')
-        geodata = gpd.read_parquet(self._path_to_gzip)
+        self._geodata = gpd.read_parquet(self._path_to_gzip)
         print("DONE")
-        return geodata
+        return
 
     def _produce_from_raw_data(self):
         print(f"Reading {self._path} ... ", end='')
-        self._geodata = gpd.read_file(self._path)
+        geodata = gpd.read_file(self._path)
         print("DONE")
-        self._geodata = self._geodata.set_index("GEOID")
+        geodata.set_index("GEOID")
 
-        self._geodata = self._geodata[~self._geodata.STATEFP.isin(gi.UNINCORPORATED_TERRORIES)]
+        geodata = UsGeoData._remove_states(geodata, gi.UNINCORPORATED_TERRORIES)
 
         # Change projection, i.e., Coordinate Reference Systems
         # https://geopandas.org/en/stable/docs/user_guide/projections.html
-        self._geodata = self._geodata.to_crs("ESRI:102003")
+        self._geodata = geodata.to_crs("ESRI:102003")
 
-        self._geodata = self._move_a_state(gi.ALASKA, 1300000, -4900000, 0.5, 32)
-        self._geodata = self._move_a_state(gi.HAWAII, 5400000, -1500000, 1, 24)
+        self._move_a_state(gi.ALASKA, 1300000, -4900000, 0.5, 32)
+        self._move_a_state(gi.HAWAII, 5400000, -1500000, 1, 24)
 
         self._geodata.to_parquet(self._path_to_gzip)
 
-        return self._geodata
+    @classmethod
+    def _remove_states(cls, gdf: gpd.GeoDataFrame,
+                       states_to_exclude: list[str]) -> gpd.GeoDataFrame:
+        return gdf[~gdf.STATEFP.isin(states_to_exclude)]
 
-    def _move_a_state(self, state_to_move: str,
-                      new_x, new_y, scale, rotate) -> gpd.GeoDataFrame:  # noqa
-        df_state_to_move = self._geodata[self._geodata.STATEFP == state_to_move]
-        df_other_states = self._geodata[~self._geodata.STATEFP.isin([state_to_move])]
+    @classmethod
+    def _keep_states(cls, gdf: gpd.GeoDataFrame,
+                     states_to_keep: list[str]) -> gpd.GeoDataFrame:
+        return gdf[gdf.STATEFP.isin(states_to_keep)]
 
-        df_state_to_move = self._translate_geometries(df_state_to_move, new_x, new_y, scale, rotate)
+    def _move_a_state(self, a_state: str,
+                      new_x, new_y, scale, rotate):
+        geodata = self._geodata
+        state_to_move: gpd.GeoDataFrame = UsGeoData._keep_states(geodata, [a_state])
+        other_states: gpd.GeoDataFrame = UsGeoData._remove_states(geodata, [a_state])
 
-        # Does not appear to be gpd.concat.
-        return gpd.GeoDataFrame(pd.concat([df_other_states, df_state_to_move]))
+        UsGeoData._update_geometry(state_to_move, new_x, new_y, scale, rotate)
 
-    def _translate_geometries(self, df, x, y, scale, rotate):  # noqa
-        df.loc[:, "geometry"] = df.geometry.translate(yoff=y, xoff=x)
-        center = df.dissolve().centroid.iloc[0]
-        df.loc[:, "geometry"] = df.geometry.scale(xfact=scale, yfact=scale, origin=center)
-        df.loc[:, "geometry"] = df.geometry.rotate(rotate, origin=center)
+        # No gpd.concat. Using pandas.concat instead, per
+        # https://geopandas.org/en/stable/docs/user_guide/mergingdata.html.
+        self._geodata = gpd.GeoDataFrame(pd.concat([other_states, state_to_move]))
 
-        return df
+    @staticmethod
+    def _update_geometry(region: gpd.GeoDataFrame, x, y, scale, rotate):
+
+        region.loc[:, "geometry"] = region.geometry.translate(xoff=x, yoff=y)
+        center = region.dissolve().centroid.iloc[0]
+        region.loc[:, "geometry"] = region.geometry.scale(xfact=scale, yfact=scale, origin=center)
+        region.loc[:, "geometry"] = region.geometry.rotate(rotate, origin=center)
