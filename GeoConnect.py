@@ -29,6 +29,9 @@ class GeoConnections:
         self.counties = self.fac.get("./data/cb_2018_us_county_500k", try_cache)
         self.facebook = fbc.FacebookConnections()
 
+    def plot_a_random_county(self):
+        self.plot_a_county(self.get_random_county())
+
     def plot_a_county(self, candidate_county):
         try:
             the_county = cty.County(candidate_county, self.counties)

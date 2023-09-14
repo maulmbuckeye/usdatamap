@@ -1,9 +1,14 @@
 from GeoConnect import GeoConnections
+import argparse
 
 
 def main():
+    is_using_random_selection = get_parameters()
     geo_connect = GeoConnections(try_cache=True)
-    do_repl_loop(geo_connect)
+    if is_using_random_selection:
+        geo_connect.plot_a_random_county()
+    else:
+        do_repl_loop(geo_connect)
 
 
 def do_repl_loop(geo_connect):
@@ -16,12 +21,20 @@ def do_repl_loop(geo_connect):
         if response == "exit":
             break
         elif response == "random":
-            random_county = geo_connect.get_random_county()
-            geo_connect.plot_a_county(random_county)
+            geo_connect.plot_a_random_county()
         elif response == "refresh":
             geo_connect.get_data(try_cache=False)
         else:
             geo_connect.plot_a_county(response)
+
+
+def get_parameters(argv=None) -> bool:
+    parser = argparse.ArgumentParser(description='Create a Social Connectedness map of the US.')
+    parser.add_argument('-r','--random',
+                        help='use a random county',
+                        action='store_true')
+    args = parser.parse_args(argv)
+    return args.random
 
 
 if __name__ == '__main__':

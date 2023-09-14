@@ -6,7 +6,7 @@ Use `~~strike this~~` for ~~strike this~~
 -------------------
 
 * Command line, -nocache option 
-* Command line, -random option 
+* ~~Command line, -random option~~
 * Command line, FIPS as an arg
   * Mulitple  FIPS  as  a list of args
 * Command line, -interactive
