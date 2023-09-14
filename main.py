@@ -14,22 +14,18 @@ class GeoConnections:
         self.facebook = None
         self.get_data(try_cache)
 
-    def set(self, c, s, f):
-        self.counties = c
-        self.states = s
-        self.facebook = f
-
     @property
     def values(self):
         return self.counties, self.states, self.facebook
 
-    def get_data(self, try_cache: bool = True) \
-            -> tuple[usgd.UsGeoData, usgd.UsGeoData, fbc.FacebookConnections]:
+    def get_random_county(self):
+       return self.counties.get_random_fips()
+
+    def get_data(self, try_cache: bool = True):
         fac = ugfac.UsGeoDataFactory()
         self.states = fac.get("./data/cb_2018_us_state_500k", try_cache)
         self.counties = fac.get("./data/cb_2018_us_county_500k", try_cache)
         self.facebook = fbc.FacebookConnections()
-        return self.counties, self.states, self.facebook
 
 
 def main():
@@ -47,7 +43,7 @@ def do_repl_loop(the_data):
         if response == "exit":
             break
         elif response == "random":
-            random_fips = the_data.counties.get_random_fips()
+            random_fips = the_data.get_random_county()
             try_to_plot_a_county(random_fips, the_data, data_breaks)
         elif response == "refresh":
             the_data.get_data(try_cache=False)
