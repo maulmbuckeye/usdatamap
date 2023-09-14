@@ -84,13 +84,13 @@ class UsGeoData:
         print(f"Reading {self._path} ... ", end='')
         geodata = gpd.read_file(self._path)
         print("DONE")
-        geodata.set_index("GEOID")
+        geodata.set_index("GEOID", inplace=True)
 
-        geodata = UsGeoData._remove_states(geodata, gi.UNINCORPORATED_TERRORIES)
+        self._geodata = UsGeoData._remove_states(geodata, gi.UNINCORPORATED_TERRORIES)
 
         # Change projection, i.e., Coordinate Reference Systems
         # https://geopandas.org/en/stable/docs/user_guide/projections.html
-        self._geodata = geodata.to_crs("ESRI:102003")
+        self._geodata = self._geodata.to_crs("ESRI:102003")
 
         self._move_a_state(gi.ALASKA, 1300000, -4900000, 0.5, 32)
         self._move_a_state(gi.HAWAII, 5400000, -1500000, 1, 24)
