@@ -1,4 +1,5 @@
 import geopandas as gpd
+import pandas as pd
 
 
 class IndexErrorRegionNotFound(IndexError):
@@ -20,9 +21,6 @@ class UsGeoData:
     def get_random_fips(self):
         random_county = self._geodata.sample(n=1)
         return random_county.index.values[0]
-
-    def iter_all_counties(self):
-        return self._geodata.iterrows()
 
     def get_name_of(self, fips: str) -> str:
         if not self.has_this_fips(fips):
@@ -54,9 +52,9 @@ class UsCountiesData(UsGeoData):
         self._geodata.loc[fips, "color"] = color
 
     @property
-    def color(self):
+    def color(self) -> pd.Series:
         return self._geodata.color
 
     @property
-    def value(self):
+    def value(self) -> pd.Series:
         return self._geodata.value

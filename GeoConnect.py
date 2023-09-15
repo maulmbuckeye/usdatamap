@@ -4,6 +4,8 @@ import usgeodatafactory as ugfac
 import usgeodata as usgd
 import plot_counties as pc
 import numpy as np
+import pandas as pd
+from typing import Any
 
 
 class GeoConnections:
@@ -50,25 +52,27 @@ class GeoConnections:
         counties = self.counties
         facebook = self.facebook
         counties.assign_values(facebook.get_number_of_connections_from_county(the_county.fips))
-        counties.assign_colors(_select_color_based_on_percentile(counties, self.data_breaks))
+        counties.assign_colors(_select_color_based_on_percentile(counties.value, self.data_breaks))
         counties.assign_color_to_region(the_county.fips, pc.SELECTED_COLOR)
 
         self.counties = counties
 
 
 def _select_color_based_on_percentile(
-        counties: usgd.UsCountiesData,
-        p_data_breaks: list[tuple]) -> list[str]:
+        value: pd.Series,
+        p_data_breaks: list[tuple]) -> list[Any]:
 
     value_for_percentile = {
-        percentile: np.percentile(counties.value, percentile)
-        for percentile, _, _ in p_data_breaks
+        percentile: np.percentile(value, percentile)
+        for percentile, _, _
+        in p_data_breaks
     }
 
-    colors: list[str] = []
-    for _, county in counties.iter_all_counties():
+    # This algorithm assumes percentiles are in decreasing order
+    colors = []
+    for a_value in value:
         for percentile, color, _ in p_data_breaks:
-            if county.value >= value_for_percentile[percentile]:
+            if a_value >= value_for_percentile[percentile]:
                 colors.append(color)
                 break
     return colors
