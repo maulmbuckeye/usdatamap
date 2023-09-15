@@ -4,6 +4,9 @@ import geopandas as gpd
 from os.path import isfile
 import usgeodata as usgd
 
+DEAULT_PATH_COUNTIES_DATA = "./data/cb_2018_us_county_500k"
+DEFAULT_PATH_TO_STATES_DATA = "./data/cb_2018_us_state_500k"
+
 
 class UsGeoDataFactory:
     def __init__(self):

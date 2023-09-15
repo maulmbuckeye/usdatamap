@@ -25,8 +25,8 @@ class GeoConnections:
         return self.counties.get_random_fips()
 
     def get_data(self, try_cache: bool = True):
-        self.states = self.fac.get("./data/cb_2018_us_state_500k", try_cache)
-        self.counties = self.fac.get("./data/cb_2018_us_county_500k", try_cache)
+        self.states = self.fac.get(ugfac.DEFAULT_PATH_TO_STATES_DATA, try_cache)
+        self.counties = self.fac.get(ugfac.DEAULT_PATH_COUNTIES_DATA, try_cache)
         self.facebook = fbc.FacebookConnections()
 
     def plot_a_random_county(self):

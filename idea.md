@@ -5,7 +5,7 @@ Use `~~strike this~~` for ~~strike this~~
 
 -------------------
 
-* Command line, -nocache option 
+* ~~Command line, -nocache option~~
 * ~~Command line, -random option~~
 * Command line, FIPS as an arg
   * Mulitple  FIPS  as  a list of args
@@ -42,3 +42,5 @@ https://matplotlib.org/stable/gallery/user_interfaces/web_application_server_sgs
 * Use Python logging
 * Clean up print statements around I/O
   * Add prints around write cache I/O  
+* Return args in a dictionary
+* ~~Make default path for GeoData, constants in factory~~
