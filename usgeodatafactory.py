@@ -36,9 +36,13 @@ class UsGeoDataFactory:
         print(f"Reading {self._path} ... ", end='')
         geodata = gpd.read_file(self._path)
         print("DONE")
+
         geodata.set_index("GEOID", inplace=True)
 
         self._geodata = _remove_states(geodata, gi.UNINCORPORATED_TERRORIES)
+
+        self._drop_unneeded_columns(['AFFGEOID', 'ALAND', 'AWATER',
+                                     'LSAD', 'COUNTYNS', 'STATENS'])
 
         # Change projection, i.e., Coordinate Reference Systems
         # https://geopandas.org/en/stable/docs/user_guide/projections.html
@@ -48,6 +52,18 @@ class UsGeoDataFactory:
         self._move_a_state(gi.HAWAII, 5400000, -1500000, 1, 24)
 
         self._geodata.to_parquet(self._path_to_gzip)
+
+    def _drop_unneeded_columns(self, possible_columns_to_drop):
+        columns_to_drop = [
+            col
+            for col in possible_columns_to_drop
+            if col in self._geodata.columns
+        ]
+        # Trying the drop in place caused this warning:
+        # A value is trying to be set on a copy of a slice from a DataFrame
+        # See the caveats in the documentation:
+        # https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+        self._geodedata = self._geodata.drop(columns=columns_to_drop)
 
     def _move_a_state(self, a_state: str,
                       new_x, new_y, scale, rotate):
