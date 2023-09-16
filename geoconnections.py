@@ -1,8 +1,8 @@
 import county as cty
-import facebook_connections as fbc
+import fbconnections as fbc
 import usgeodatafactory as ugfac
 import usgeodata as usgd
-import plot_counties as pc
+import plotcounties as pc
 import numpy as np
 import pandas as pd
 from typing import Any
@@ -29,7 +29,7 @@ class GeoConnections:
     def get_data(self, try_cache: bool = True):
         self.states = self.fac.get(ugfac.DEFAULT_PATH_TO_STATES_DATA, try_cache)
         self.counties = self.fac.get(ugfac.DEAULT_PATH_COUNTIES_DATA, try_cache)
-        self.facebook = fbc.FacebookConnections()
+        self.facebook = fbc.FBConnections()
 
     def plot_a_random_county(self):
         self.plot_a_county(self.get_random_county())

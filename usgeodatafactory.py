@@ -1,5 +1,5 @@
 import pandas as pd
-import geo_info as gi
+import geoconstants as gi
 import geopandas as gpd
 from os.path import isfile
 import usgeodata as usgd

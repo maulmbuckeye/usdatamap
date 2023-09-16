@@ -1,4 +1,4 @@
-from GeoConnect import GeoConnections
+from geoconnections import GeoConnections
 import argparse
 
 

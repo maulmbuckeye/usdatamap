@@ -27,7 +27,7 @@ https://matplotlib.org/stable/gallery/user_interfaces/web_application_server_sgs
 *   Make `data_breaks` a class
 * Create list for `pip` to install 
 * Make more things private `__`
-* Better name for `facebook_connects` and its variables
+* Better name for ~~`facebook_connects` and~~ its variables
 * Make colors an enumeration for better type hints
 * Use dictionary of {command: function} in REPL
 * Clean up print statements around I/O
@@ -35,24 +35,29 @@ https://matplotlib.org/stable/gallery/user_interfaces/web_application_server_sgs
 * Return cmd line args in a dictionary
 * ~~Use jupyter~~
 * Document autoreload in jupyter
-* Standard imports to begin session
+* Standard imports to begin jupyter session
 * How to set up venv for jupyter
-* Make file names consistient with PEP
 * Make Class name consistient with PEP
 * Make variable consistient with PEP
-* Programmaticly get fb data from web
-* Programmaticly get geodata from web
 * Make generic interface to link up with any values in DF
 * Use absolute counts for `data_breaks`
 *  Directory for jupyter
 *  Src  directory 
+*  Make this its own GitHub repo
+*  PEP8 import sequence
+
+DUBIOUS
+* Programmaticly get fb data from web
+* Programmaticly get geodata from web
 
 DONE
 * ~~Make default path for GeoData, constants in factory~~
-* ~~~~BAD IDEA: Use Python logging~~~~
+* BAD IDEA: Use Python logging
 * ~~Remove hardcoded filenames from `FacebookConnections`~~
 * ~~Command line, -nocache option~~
 * ~~Command line, -random option~~
 * Command line, -interactive - NOT NEEDED
 * ~~Delete unused columns before caching (save time and space)~~
+* README.md
+* ~~Make file names consistient with PEP~~
 

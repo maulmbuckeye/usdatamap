@@ -2,7 +2,7 @@ import usgeodata as usgd
 
 
 class County:
-    def __init__(self, fips: str, usgd_counties: usgd.UsGeoData):
+    def __init__(self, fips: str, usgd_counties: usgd.UsCountiesData):
         self.__fips = fips
         self.__name = usgd_counties.get_name_of(self.__fips)
         self.__center_xy = usgd_counties.get_center_xy_of(self.__fips)

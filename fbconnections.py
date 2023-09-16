@@ -2,7 +2,7 @@ import pandas as pd
 from os.path import isfile
 
 
-class FacebookConnections:
+class FBConnections:
     FACEBOOK_DATA_GZIP = "./data/county_county.gzip"
     FACEBOOK_DATA_TSV = "./data/county_county.tsv"
 
